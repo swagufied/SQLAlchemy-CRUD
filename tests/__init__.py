@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session
 from .utils import block_msg
 import sqlalchemy
 Base = declarative_base()
-
-
+#
+#
 engine = create_engine("sqlite://", echo=False)
 block_msg("Creating Tables:")
 
@@ -21,6 +21,10 @@ Base.metadata.create_all(engine)
 
 session = Session(engine)
 
+# from CRUD import SQLAlchemyCRUD
+#
+# db = SQLAlchemyCRUD("sqlite://")
+# db.connect()
 
 """
 

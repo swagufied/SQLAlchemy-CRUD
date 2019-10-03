@@ -1,6 +1,6 @@
 from tests import Base
 from datetime import datetime
-from sqlalchemy import ForeignKey
+from sqlalchemy import Table, ForeignKey
 from sqlalchemy import Integer, Column, DateTime
 from sqlalchemy import String
 from sqlalchemy.orm import backref
@@ -12,6 +12,10 @@ class TableBase(Base):
 	id = Column(Integer, primary_key=True)
 	creation_date = Column(DateTime, default=datetime.utcnow)
 
+user_role = Table('user_role', Base.metadata,
+	Column('user_id', Integer, ForeignKey('User.id')),
+	Column('role_id', Integer, ForeignKey('Role.id'))
+)
 
 class User(TableBase):
 	__tablename__ = "User"
@@ -20,6 +24,12 @@ class User(TableBase):
 	email = Column(String(50), unique=True)
 
 	comments = relationship('Comment', backref='user')
+	roles = relationship("Role", secondary=user_role, backref="users")
+
+class Role(TableBase):
+	__tablename__ = "Role"
+	name = Column(String(30))
+
 
 class Comment(TableBase):
 	__tablename__ = "Comment"

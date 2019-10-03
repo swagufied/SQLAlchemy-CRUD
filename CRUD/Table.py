@@ -2,7 +2,7 @@ from .BaseCRUD import BaseCRUD
 from sqlalchemy.sql import schema
 from flask_sqlalchemy.model import DefaultMeta
 from .ComplexCRUD import ComplexCRUD
-
+from .pre_processing import get_relationship_data
 """
 session is the session of the db
 table must be a db.Model object or string of the objects classname.
@@ -19,9 +19,16 @@ relationships = {
 
 
 class Table(ComplexCRUD):
-	def __init__(self, session, table, table_schema=None, relationship_schema=None):
+	def __init__(self, session, table, decl_class_tables={}, table_schema=None, relationship_schema=None):
 		self._session = session
 		self._table = table
+
+		relationships = get_relationship_data(table, decl_class_tables)
+		print(relationships)
+		# "value": values[relationship],
+		# "table": get_relationship_target_table(table, relationship),
+		# "type": relationship_schema[relationship],
+		# "pk": get_primary_key(table)
 
 		self.local_params = {}
 		self.local_params['table_schema'] = table_schema
@@ -57,7 +64,7 @@ class tTable(BaseCRUD):
 		self._db = db
 		self._table = self.get_table(table, db=db)
 		self._table_columns = self.get_table_columns(self._table)
-		
+
 		self._primary_key = self.get_primary_key(self._table)
 		self._unique_columns = self.get_unique_columns()
 		self._schema = schema
@@ -74,7 +81,7 @@ class tTable(BaseCRUD):
 			raise Exception('table of type db.Model must be given as table argument.')
 		for r in self._table.__mapper__.relationships:
 			rel_type = ''
-	
+
 			if r.viewonly:
 				continue
 
@@ -86,7 +93,7 @@ class tTable(BaseCRUD):
 			# if no fk in either table - must be m2m
 
 			# association ????? TODO
-			
+
 			# print('r', r)
 			# print('target', r.target)
 			# print('parent', r.parent)
@@ -95,7 +102,7 @@ class tTable(BaseCRUD):
 			# print(dir(r))
 			# print(dir(r.table))
 
-			
+
 			# for distinguishing parent in self referencing relationships
 			backref_in_current = False
 			if r.backref:
@@ -116,7 +123,7 @@ class tTable(BaseCRUD):
 				if fk_in_current:
 					break
 
-			# determine if the foreign key of the relationship is defined in the target table	
+			# determine if the foreign key of the relationship is defined in the target table
 			fk_in_target = False
 			for col in self.get_table_columns(r.table):
 				if col.foreign_keys:
@@ -156,7 +163,7 @@ class tTable(BaseCRUD):
 			elif not fk_in_target and not fk_in_target:
 				rel_type = 'm2m'
 
-		
+
 				# # association - no foreign key in either
 				# if r.table not in [r.back_populates]
 			relationship_name = (str(r)).split('.')[1]
@@ -164,7 +171,7 @@ class tTable(BaseCRUD):
 				'table': str(r.table.fullname),
 				'rel_type': rel_type
 			}
-		
+
 		# print(out_data)
 		return out_data
 
@@ -216,7 +223,7 @@ class tTable(BaseCRUD):
 				unique_columns.append(column.name)
 		return unique_columns
 
-	# takes in dict and returns dict keys that match the table's column names 
+	# takes in dict and returns dict keys that match the table's column names
 	def filter_column_values(self, edit_primary=False, include_relationships=True, **kwargs):
 		#pulls all valid values after ensuring - cannot edit primary key
 		values={}

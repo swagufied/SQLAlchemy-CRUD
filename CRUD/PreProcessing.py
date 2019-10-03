@@ -10,7 +10,7 @@ def get_column_names(table):
 		return [col.name for col in table.columns]
 
 	return []
-	
+
 
 def get_relationship_names(table):
 
@@ -25,22 +25,39 @@ def get_relationship_target_table(table, relationship_name):
 
 def get_relationship_data(table):
 
-
+	print('DETECTING RELATIONSHIP DATA')
 	# table info
 	# relationship type
 	# table of target
 	# primary key of target
-
-	
+	print('table: %s' % table)
+	print('table type: %s' % type(table))
+	print()
 	relationship_data = []
 	for r in sqlalchemy.inspect(table).relationships:
+		print('INSPECTING RELATIONSHIP: %s' % r)
+		print('r type: %s' % type(r))
+		print('r table: %s' % r.table)
+		print('r table type: %s' % type(r.table))
+		print(dir(r.table))
+		#
+		# for prop in dir(r.table):
+		# 	print(str(prop), type(getattr(r.table, prop)), getattr(r.table, prop))
+		# 	print()
+
+		print(r.table.tometadata, type(r.table.tometadata))
+		print(r.table.metadata.tables, 'ss')
+		print(dir(r.table.metadata))
+		for f in r.table.tometadata:
+			print(f, type(f))
+
 
 		# make sure relationship we look at is from the current table
 
 
 		rstring = str(r).split('.')[1]
 		relationship = getattr(table, rstring)
-		
+		print('relationship', type(relationship),relationship)
 		# print('col.parent', type(col.parent), dir(col.parent))
 		# print(col.parent.relationships)
 
@@ -67,7 +84,7 @@ def get_relationship_data(table):
 					# if r.uselist == False and r.parent
 
 		# check to see which foreign key
-		
+
 
 		# check backref and uselist first
 		# check foreign keys
@@ -92,6 +109,7 @@ def get_relationship_data(table):
 		# print(r.table, type(r.table), dir(r.table))
 		# one to many
 
+		print()
 
 	return
 
@@ -132,7 +150,7 @@ class PreProcessing:
 		if table_schema:
 			values = getattr(table_schema, load)(values)
 		columns, relationships = PreProcessing.filter_values(table,values, relationship_schema=relationship_schema)
-
+		print(columns, relationships)
 
 		# run checks on constraints
 		if constraints:
@@ -153,7 +171,7 @@ class PreProcessing:
 		# 		pass
 		# 	else:
 		# 		raise Exception('invalid input for kwarg constraints')
-		
+
 
 		# return_data = table.query.filter(*statement).limit(query_limit).all()
 
@@ -162,7 +180,7 @@ class PreProcessing:
 		return columns, relationships
 
 	def filter_values(table, values, relationship_schema=None):
-
+		relationship_schema = None
 		columns = {}
 		for column_name in get_column_names(table):
 			if column_name in values:
@@ -170,17 +188,20 @@ class PreProcessing:
 
 
 		relationships = {}
-		# if not relationship_schema:
-		# 	relationship_schema = get_relationship_data(table)
 
-		for relationship in relationship_schema:
-			if relationship in values:
-				relationships[relationship] = {
-						"value": values[relationship],
-						"table": get_relationship_target_table(table, relationship),
-						"type": relationship_schema[relationship],
-						"pk": get_primary_key(table)
-					}
+		# if relationship schema isnt provided, determine it
+		if not relationship_schema:
+			relationship_schema = get_relationship_data(table)
+		else:
+			# if a relationship schema is provided
+			for relationship in relationship_schema:
+				if relationship in values:
+					relationships[relationship] = {
+							"value": values[relationship],
+							"table": get_relationship_target_table(table, relationship),
+							"type": relationship_schema[relationship],
+							"pk": get_primary_key(table)
+						}
 
 		return columns, relationships
 
@@ -209,7 +230,7 @@ class PreProcessing:
 
 	# 	"""
 	# 	returns the construants (e.g. unique, check, primary_key)
-		
+
 	# 	{
 	# 		'unique': ['username'],
 	# 		'check': ''
