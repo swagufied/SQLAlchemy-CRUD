@@ -1,13 +1,13 @@
 import sqlalchemy
 import itertools
-from .utils import get_columns_from_decl_meta
+from .utils import get_columns_from_decl_meta, get_primary_keys_from_decl_meta
 
 
-
-def get_target_table_relationship_with_backref(decl_meta_table, target_table_name, relationship_name):
+# will return the relationship in decl_meta_table that is connected to the target_tablename and has a backref of relationship_name
+def get_target_table_relationship_with_backref(decl_meta_table, target_tablename, relationship_name):
 
 	for relationship in sqlalchemy.inspect(decl_meta_table).relationships:
-		if str(relationship.target) == target_table_name and (relationship.backref == relationship_name or relationship.back_populates == relationship_name):
+		if str(relationship.target) == target_tablename and (relationship.backref == relationship_name or relationship.back_populates == relationship_name):
 			return relationship
 
 	return None
@@ -21,21 +21,14 @@ def get_foreign_key_table_map(decl_meta_table):
 		if column.foreign_keys:
 			for fk in column.foreign_keys:
 
-				target_table_name = fk.target_fullname.split('.')[0]
+				target_tablename = fk.target_fullname.split('.')[0]
 
-				# print(dir(fk), fk.target_fullname)
-				# print('name', fk.name)
-				# print('fk.column', fk.column)
-				# print('link_to_name', fk.link_to_name)
-				# print('references', fk.references)
-				# print('info', fk.info)
-				# print('kwargs', fk.kwargs)
-				if target_table_name in fk_table_map:
-					fk_table_map[target_table_name].append({
+				if target_tablename in fk_table_map:
+					fk_table_map[target_tablename].append({
 						'column_name': column.name
 					})
 				else:
-					fk_table_map[target_table_name] = [{
+					fk_table_map[target_tablename] = [{
 						'column_name': column.name
 					}]
 	return fk_table_map
@@ -48,13 +41,13 @@ first, the foreign keys in the table are compiled.
 The relationship are iterated through to then find information about them.
 """
 
-def get_relationship_data(table, decl_class_tables):
+def get_relationship_schema(table, decl_class_tables):
 
 	print('DETECTING RELATIONSHIP DATA')
 	print('table: %s' % table)
 
 
-	relationship_data = []
+	relationship_data = {}
 	fk_table_map = get_foreign_key_table_map(table)
 
 
@@ -82,17 +75,16 @@ def get_relationship_data(table, decl_class_tables):
 		fk_in_table = False
 		fk_in_target = False
 
+		target_table = decl_class_tables[target_tablename]
+
 		# check if the relationship has a foreign key restraint and if it has uselist=True for the relationship
 		if target_tablename in fk_table_map:
 			fk_in_table = True
 
-
-
-
 			# check if the target has uselist=True
 			if target_tablename in decl_class_tables:
 
-				target_relationship = get_target_table_relationship_with_backref(decl_class_tables[target_tablename], relationship_table, relationship_name)
+				target_relationship = get_target_table_relationship_with_backref(target_table, relationship_table, relationship_name)
 				print('target_relationship', target_relationship)
 				if target_relationship:
 					print('in target_rel')
@@ -100,6 +92,7 @@ def get_relationship_data(table, decl_class_tables):
 						target_uselist = True
 
 		else: # current table doesnt have foreign key to relationship table.
+			print(target_tablename, decl_class_tables)
 			target_table = decl_class_tables[target_tablename]
 			target_fk_table_map = get_foreign_key_table_map(target_table)
 
@@ -151,13 +144,16 @@ def get_relationship_data(table, decl_class_tables):
 			#TODO: detect association table
 
 
-		relationship_data.append({
-			'name': relationship_name,
+		relationship_data[relationship_name] = {
 			'type': relationship_type,
-			'table': decl_class_tables[target_tablename]
-			})
+			'table':target_table,
+			'pk': get_primary_keys_from_decl_meta(target_table)
+			}
 
 
 		print()
 
 	return relationship_data
+
+def get_constraint_data():
+	pass

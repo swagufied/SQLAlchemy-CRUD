@@ -27,6 +27,9 @@ class User(TableBase):
 	roles = relationship("Role", secondary=user_role, backref="users")
 	details = relationship("UserDetails", uselist=False, back_populates="user")
 
+	def __repr__(self):
+		return self.username
+
 class UserDetails(TableBase):
 	__tablename__ = "UserDetails"
 	is_active = Column(Boolean, default=True)

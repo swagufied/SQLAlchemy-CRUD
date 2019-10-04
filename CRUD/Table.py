@@ -2,7 +2,8 @@ from .BaseCRUD import BaseCRUD
 from sqlalchemy.sql import schema
 from flask_sqlalchemy.model import DefaultMeta
 from .ComplexCRUD import ComplexCRUD
-from .pre_processing import get_relationship_data
+from .pre_processing import get_relationship_schema
+from .utils import get_column_schema
 """
 session is the session of the db
 table must be a db.Model object or string of the objects classname.
@@ -19,26 +20,23 @@ relationships = {
 
 
 class Table(ComplexCRUD):
-	def __init__(self, session, table, decl_class_tables={}, table_schema=None, relationship_schema=None):
+	def __init__(self, session, table, decl_meta_tables={}, table_schema=None, relationship_schema=None):
 		self._session = session
 		self._table = table
 
-		relationships = get_relationship_data(table, decl_class_tables)
-		print(relationships)
-		# "value": values[relationship],
-		# "table": get_relationship_target_table(table, relationship),
-		# "type": relationship_schema[relationship],
-		# "pk": get_primary_key(table)
+		self.column_schema = get_column_schema(table)
+		self.relationship_schema = get_relationship_schema(table, decl_meta_tables)
+
+
 
 		self.local_params = {}
-		self.local_params['table_schema'] = table_schema
-		self.local_params['relationship_schema'] = relationship_schema
+
 
 	"""
 	CRUD
 	"""
 	def create(self, values, **kwargs):
-		return self._cupdate(self._session, self._table, None, values, **self.local_params, **kwargs)
+		return self._cupdate(self._session, self._table, None, values, column_schema = self.column_schema, relationship_schema=self.relationship_schema, **self.local_params, **kwargs)
 
 	def read(self, row_id, **kwargs):
 		return self._cread(self._session, self._table, row_id, **self.local_params, **kwargs)

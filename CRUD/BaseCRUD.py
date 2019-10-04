@@ -17,7 +17,7 @@ class BaseCRUD:
 
 		row = table(**values)
 		session.add(row)
-		
+
 		if commit:
 			self._flush(session)
 		else:
@@ -60,7 +60,7 @@ class BaseCRUD:
 
 	def _bupdate(self, session, table, row_id, values, commit=False):
 
-		self._bread(session, table, row_id)
+		row = self._bread(session, table, row_id)
 		for key in values:
 			setattr(row, key, values[key])
 
@@ -97,5 +97,3 @@ class BaseCRUD:
 
 	def _rollback(self, session):
 		session.rollback()
-
-

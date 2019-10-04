@@ -33,23 +33,23 @@ class ComplexCRUD(BaseCRUD):
 	"""
 
 	def _cread(self, session, table, row_id, format_output=True):
-
 		row = self._bread(session, table, row_id)
-
-		if format_output:
-			if schema:
-				return schema.dump(row)
-			else:
-				return PostProcessing.dump(row)
-		else:
-			return row
+		return row
 
 	@rollback_handler
-	def _cupdate(self, session, table, row_id, values, table_schema=None, commit=True, **kwargs):
-		# print('cupdate kwargs', kwargs)
-		columns, relationships = PreProcessing.preprocess(table, values, table_schema=table_schema, **kwargs)
+	def _cupdate(self, session, table, row_id, values, commit=True, column_schema={}, relationship_schema={}, **kwargs): # use_default_conflict = True, conflict_schema = {}
 
+		# check constraints
+		columns = {}
+		relationships = {}
+		for key, value in values.items():
 
+			if key in column_schema:
+				columns[key] = value
+			elif key in relationship_schema:
+				relationships[key] = value
+
+		# update column
 		row = None
 		if row_id:
 			row = self._bupdate(session, table, row_id, columns)
@@ -58,17 +58,26 @@ class ComplexCRUD(BaseCRUD):
 
 
 		# manage relationships
-		# print('relationships', relationships)
-		for relationship, properties in relationships.items():
-			if properties['type'] == 'o2m':
-				if isinstance(properties['value'], list):
-					for value in properties['value']:
-						self._cupdate(session, properties['table'], properties['pk'], value)
-				else:
-					self._cupdate(session, properties['table'], properties['pk'], properties['value'])
+		for relationship_name, value in relationships.items():
 
-			elif relationship['type'] == 'm2m':
-				x=1
+			relationship_info = relationship_schema[relationship_name]
+
+			print(value)
+
+			if relationship_info['type'] == 'o2m': # must be list type
+
+				for row_info in value:
+					relationship_row_id = self.get_row_id(row_info, relationship_info['pk'])
+					self._cupdate(session, relationship_info['table'], relationship_row_id, row_info)
+
+			elif relationship_info['type'] == 'm2m':
+				pass
+			elif relationship_info['type'] == 'o2o':
+				relationship_row_id = self.get_row_id(row_info, relationship_info['pk'])
+				self._cupdate(session, relationship_info['table'], relationship_row_id, value)
+			elif relationship_info['type'] == 'm2o':
+				relationship_row_id = self.get_row_id(row_info, relationship_info['pk'])
+				self._cupdate(session, relationship_info['table'], relationship_row_id, value)
 
 
 		# commit changes
@@ -83,6 +92,19 @@ class ComplexCRUD(BaseCRUD):
 	for delete, just call BaseCRUD._bdelete
 	"""
 
+	def get_row_id(self, values, primary_key_columns):
+
+		row_id = {}
+
+		for pk in primary_key_columns:
+			row_id[pk] = values.get(pk)
+
+		if len(row_id.keys()) < len(primary_key_columns):
+			row_id = {}
+
+		if len(row_id.keys()) == 1:
+			row_id = [v for k,v in row_id.items()][0]
+		return row_id
 
 	# takes in dict, returns a filter in format for sqlalchemy to process
 	def process_conflict_params(self, constraints, **values):
