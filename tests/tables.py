@@ -1,7 +1,7 @@
 from tests import Base
 from datetime import datetime
 from sqlalchemy import Table, ForeignKey
-from sqlalchemy import Integer, Column, DateTime
+from sqlalchemy import Integer, Column, DateTime, Boolean
 from sqlalchemy import String
 from sqlalchemy.orm import backref
 from sqlalchemy.orm import joinedload_all
@@ -25,6 +25,14 @@ class User(TableBase):
 
 	comments = relationship('Comment', backref='user')
 	roles = relationship("Role", secondary=user_role, backref="users")
+	details = relationship("UserDetails", uselist=False, back_populates="user")
+
+class UserDetails(TableBase):
+	__tablename__ = "UserDetails"
+	is_active = Column(Boolean, default=True)
+	user_id = Column(Integer, ForeignKey("User.id"))
+
+	user = relationship("User", back_populates="details")
 
 class Role(TableBase):
 	__tablename__ = "Role"

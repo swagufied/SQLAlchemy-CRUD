@@ -33,7 +33,7 @@ class ComplexCRUD(BaseCRUD):
 	"""
 
 	def _cread(self, session, table, row_id, format_output=True):
-		
+
 		row = self._bread(session, table, row_id)
 
 		if format_output:
@@ -71,22 +71,13 @@ class ComplexCRUD(BaseCRUD):
 				x=1
 
 
-
-		format_output=False
 		# commit changes
 		if commit:
 			self._flush(session)
 		else:
 			self._commit(session)
 
-
-		if format_output:
-			if table_schema:
-				return table_schema.dump(row)
-			else:
-				return PostProcessing.dump(row)
-		else:
-			return row
+		return row
 
 	"""
 	for delete, just call BaseCRUD._bdelete
@@ -103,7 +94,7 @@ class ComplexCRUD(BaseCRUD):
 				if not conflict_params:
 					return None, conflict_params
 			tuple_conflict_params = SQLHandler.sqlize_filter(self._table, conflict_params, **values)
-			
+
 		else: # if a personalized check is input
 			tuple_conflict_params = conflict_params
 
@@ -168,7 +159,7 @@ class cComplexCRUD:
 		# 			if not partial_update:
 		# 				for child_id in child_ids:
 		# 					row_delete_helper(rel_table, child_id)
-				
+
 		# 		# many to many
 		# 		if rel_type = 'm2m':
 		# 			child_ids = [getattr(child, rel_pk) for tag in getattr(row, column)]
@@ -177,12 +168,12 @@ class cComplexCRUD:
 
 		# 				if getattr(child_row, rel_pk) in child_ids:
 		# 					del child_ids[child_ids.index(getattr(child_row, rel_pk))]
-					
+
 		# 			if not partial_update:
 		# 				for child_id in child_ids:
 		# 					m2m_update_helper(rel_table, row, child_id, )
 
-				
+
 
 
 	def row_create_helper(self, conflict_params={}, check_conflict=True, **validated_schema):
@@ -206,7 +197,7 @@ class cComplexCRUD:
 		except Exception as e:
 			db.session.rollback()
 			raise e
-		
+
 	def m2m_update_helper(table, parent, row_id, fxn):
 		try:
 			row = Row(table)
@@ -236,7 +227,7 @@ class cComplexCRUD:
 			child_rows.append(child_row)
 			if child_attr in child:
 				tiered_parent_helper(table, child[child_attr], parent=child_row, child_attr=child_attr)
-				
+
 
 		for child_id in child_ids:
 			row_delete_helper(table, child_id)
@@ -352,7 +343,7 @@ class cComplexCRUD:
 			for link_id in link_ids:
 				row_delete_helper('AnswerLink', link_id)
 
-		
+
 
 
 		# commit changes

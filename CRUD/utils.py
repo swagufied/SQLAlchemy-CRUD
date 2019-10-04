@@ -15,6 +15,11 @@ def get_decl_class_tables_from_base(base):
 def get_columns_from_decl_meta(table):
 	return [col for col in table.__table__.columns]
 
+def get_tablename_from_decl_meta(table):
+	pass
+
+def get_tablename_from_relationship(relationship):
+	pass
 
 # def get_table(self, table, db=None):
 # 		if hasattr(self, '_db'):
