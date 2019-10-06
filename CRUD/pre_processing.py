@@ -66,7 +66,8 @@ def get_relationship_schema(table, decl_class_tables):
 		relationship_table = str(relationship).split('.')[0]
 		relationship_name = str(relationship).split('.')[1]
 		target_tablename = relationship.target.name # target table of the relationship
-
+		target_table = decl_class_tables[target_tablename]
+		
 		print('target_tablename', target_tablename)
 
 		# these variables will be used to determine the type of relationship
@@ -75,7 +76,7 @@ def get_relationship_schema(table, decl_class_tables):
 		fk_in_table = False
 		fk_in_target = False
 
-		target_table = decl_class_tables[target_tablename]
+
 
 		# check if the relationship has a foreign key restraint and if it has uselist=True for the relationship
 		if target_tablename in fk_table_map:

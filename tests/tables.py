@@ -17,18 +17,31 @@ user_role = Table('user_role', Base.metadata,
 	Column('role_id', Integer, ForeignKey('Role.id'))
 )
 
+
 class User(TableBase):
 	__tablename__ = "User"
 	# id = Column(Integer, primary_key=True)
-	username = Column(String(50), nullable=False)
-	email = Column(String(50), unique=True)
+	name = Column(String(50), nullable=False)
 
-	comments = relationship('Comment', backref='user')
-	roles = relationship("Role", secondary=user_role, backref="users")
-	details = relationship("UserDetails", uselist=False, back_populates="user")
+	comments = relationship('Comment', backref='user') #o2m with backref
+	nicknames = relationship('NickName', back_populates="user") #o2m with back_populates
+
+	roles = relationship("Role", secondary=user_role, backref="users") #m2m with backref
+
+	#m2m with back_populates
+
+	details = relationship("UserDetails", uselist=False, back_populates="user") # o2o with back_populates
+	sensitive_info = relationship("UserSensitiveInfo", uselist=False, backref="user") # o2o with backref
 
 	def __repr__(self):
-		return self.username
+		return "<User {}: {}>".format(self.id, self.name)
+
+class NickName(TableBase):
+	__tablename__ = "NickName"
+	name = Column(String(50))
+	user_id = Column(Integer, ForeignKey("User.id"))
+
+	user = relationship("User", back_populates="nicknames")
 
 class UserDetails(TableBase):
 	__tablename__ = "UserDetails"
@@ -36,6 +49,12 @@ class UserDetails(TableBase):
 	user_id = Column(Integer, ForeignKey("User.id"))
 
 	user = relationship("User", back_populates="details")
+
+class UserSensitiveInfo(TableBase):
+	__tablename__ = "UserSensitiveInfo"
+	password = Column(String(50))
+	user_id = Column(Integer, ForeignKey("User.id"))
+
 
 class Role(TableBase):
 	__tablename__ = "Role"
@@ -47,3 +66,5 @@ class Comment(TableBase):
 	# id = Column(Integer, primary_key=True)
 	text = Column(String(100))
 	user_id = Column(Integer, ForeignKey("User.id"))
+
+	# replies =

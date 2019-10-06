@@ -42,7 +42,7 @@ class Table(ComplexCRUD):
 		return self._cread(self._session, self._table, row_id, **self.local_params, **kwargs)
 
 	def update(self, row_id, values, **kwargs):
-		return self._cupdate(self._session, self._table, row_id, values, **self.local_params, **kwargs)
+		return self._cupdate(self._session, self._table, row_id, values,column_schema = self.column_schema, relationship_schema=self.relationship_schema, **self.local_params, **kwargs)
 
 	def delete(self, row_id, **kwargs):
 		return self._bdelete(self._session, self._table, row_id, **kwargs)
