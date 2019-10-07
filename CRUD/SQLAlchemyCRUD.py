@@ -17,16 +17,16 @@ class SQLAlchemyCRUD(object):
 
 
         self.decl_meta_tables = get_decl_meta_tables_from_base(base)
-        print(self.decl_meta_tables)
+        # print(self.decl_meta_tables)
 
         for table in base._decl_class_registry.values():
             if isinstance(table, DeclarativeMeta):
 
                 tablename = get_tablename_from_decl_meta(table)
 
-                print()
-                print('INITIALIZING TABLE: %s' % table.__tablename__)
-                print()
+                # print()
+                # print('INITIALIZING TABLE: %s' % table.__tablename__)
+                # print()
 
                 sacrud_table = Table(session, table, decl_meta_tables=self.decl_meta_tables)
                 setattr(self, tablename, sacrud_table)

@@ -43,15 +43,15 @@ The relationship are iterated through to then find information about them.
 
 def get_relationship_schema(table, decl_class_tables):
 
-	print('DETECTING RELATIONSHIP DATA')
-	print('table: %s' % table)
+	# print('DETECTING RELATIONSHIP DATA')
+	# print('table: %s' % table)
 
 
 	relationship_data = {}
 	fk_table_map = get_foreign_key_table_map(table)
 
 
-	print(fk_table_map)
+	# print(fk_table_map)
 
 	# relationship is of type <class 'sqlalchemy.orm.relationships.RelationshipProperty'>
 	for relationship in sqlalchemy.inspect(table).relationships:
@@ -60,15 +60,15 @@ def get_relationship_schema(table, decl_class_tables):
 		if relationship.viewonly:
 			continue
 
-		print('INSPECTING RELATIONSHIP: %s' % relationship)
+		# print('INSPECTING RELATIONSHIP: %s' % relationship)
 
 
 		relationship_table = str(relationship).split('.')[0]
 		relationship_name = str(relationship).split('.')[1]
 		target_tablename = relationship.target.name # target table of the relationship
 		target_table = decl_class_tables[target_tablename]
-		
-		print('target_tablename', target_tablename)
+
+		# print('target_tablename', target_tablename)
 
 		# these variables will be used to determine the type of relationship
 		table_uselist = False
@@ -86,14 +86,12 @@ def get_relationship_schema(table, decl_class_tables):
 			if target_tablename in decl_class_tables:
 
 				target_relationship = get_target_table_relationship_with_backref(target_table, relationship_table, relationship_name)
-				print('target_relationship', target_relationship)
 				if target_relationship:
-					print('in target_rel')
 					if target_relationship.uselist:
 						target_uselist = True
 
 		else: # current table doesnt have foreign key to relationship table.
-			print(target_tablename, decl_class_tables)
+			# print(target_tablename, decl_class_tables)
 			target_table = decl_class_tables[target_tablename]
 			target_fk_table_map = get_foreign_key_table_map(target_table)
 
@@ -107,10 +105,10 @@ def get_relationship_schema(table, decl_class_tables):
 			table_uselist = True
 		# check if the target table of the relationship has a foreign key restraint
 
-		print('table_uselist', table_uselist)
-		print('target_uselist',target_uselist)
-		print('fk_in_table',fk_in_table)
-		print('fk_in_target', fk_in_target)
+		# print('table_uselist', table_uselist)
+		# print('target_uselist',target_uselist)
+		# print('fk_in_table',fk_in_table)
+		# print('fk_in_target', fk_in_target)
 
 		relationship_type = ""
 
@@ -152,7 +150,7 @@ def get_relationship_schema(table, decl_class_tables):
 			}
 
 
-		print()
+		# print()
 
 	return relationship_data
 

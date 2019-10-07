@@ -6,10 +6,12 @@ from tests.utils import block_msg
 # from tests.crud_tests import CreateTest
 # https://docs.sqlalchemy.org/en/13/_modules/examples/adjacency_list/adjacency_list.html
 from tests.test_relationship_detect import *
-
+from tests.test_utils_tables import *
 from sqlize.sqlize_filter import sqlize_filter
 if __name__ == '__main__':
-	unittest.main()
+	# unittest.main()
+	testsuite = unittest.TestLoader().discover('.')
+	unittest.TextTestRunner(verbosity=1).run(testsuite)
 
 
 # print(Base.metadata.tables, type(Base.metadata.tables['user_role']))

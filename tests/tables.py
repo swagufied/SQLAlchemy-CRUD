@@ -23,7 +23,7 @@ class User(TableBase):
 	# id = Column(Integer, primary_key=True)
 	name = Column(String(50), nullable=False)
 
-	comments = relationship('Comment', backref='user') #o2m with backref
+	# comments = relationship('Comment', backref='user') #o2m with backref
 	nicknames = relationship('NickName', back_populates="user") #o2m with back_populates
 
 	roles = relationship("Role", secondary=user_role, backref="users") #m2m with backref
@@ -67,4 +67,6 @@ class Comment(TableBase):
 	text = Column(String(100))
 	user_id = Column(Integer, ForeignKey("User.id"))
 
+
+	user = relationship("User", backref="comments") # define relationship in child
 	# replies =

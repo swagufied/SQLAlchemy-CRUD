@@ -38,23 +38,11 @@ def get_column_schema(table):
 
 	return column_schema
 
-def get_column_names_from_decl_meta(table):
-	return [col.name for col in table.__table__.columns]
+# def get_column_names_from_decl_meta(table):
+# 	return [col.name for col in table.__table__.columns]
 
 def get_tablename_from_decl_meta(table):
 	return table.__tablename__
 
-def get_tablename_from_relationship(relationship):
-	pass
-
-# def get_table(self, table, db=None):
-# 		if hasattr(self, '_db'):
-# 			if isinstance(table, str):
-# 				table = [cls for cls in self._db.Model._decl_class_registry.values()
-# 				if isinstance(cls, type) and issubclass(cls, self._db.Model) and cls.__tablename__ == table][0]
-# 		else:
-# 			if isinstance(table, str):
-# 				table = [cls for cls in db.Model._decl_class_registry.values()
-# 				if isinstance(cls, type) and issubclass(cls, db.Model) and cls.__tablename__ == table][0]
-#
-# 		return table
+# def get_tablename_from_relationship(relationship):
+# 	pass
